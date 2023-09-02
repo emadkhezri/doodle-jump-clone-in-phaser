@@ -1,3 +1,4 @@
+import phaser from '../lib/phaser.js';
 import Phaser from '../lib/phaser.js';
 
 export default class Game extends Phaser.Scene
@@ -13,6 +14,9 @@ export default class Game extends Phaser.Scene
     /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
     cursors
 
+    /** @type {Phaser.GameObjects.Group} */
+    clouds
+
     constructor()
     {
         super({ key: 'Game' });
@@ -22,6 +26,8 @@ export default class Game extends Phaser.Scene
     {
         this.load.setBaseURL('assets/')
         this.load.image('background', 'Background/bg_layer1.png')
+
+        this.load.image('cloud', 'Enemies/cloud.png')
         // load the platform image
         this.load.image('platform', 'Environment/ground_grass.png')
         // add this new line
@@ -34,6 +40,13 @@ export default class Game extends Phaser.Scene
     {
         var image = this.add.image(240, 320, 'background').setScrollFactor(1, 0)
 
+        this.clouds = this.add.group();
+        for (let index = 0; index < 3; index++)
+        {
+            const x = Phaser.Math.Between(0, 480)
+            const y = 250 * index;
+            this.clouds.add(this.add.image(x, y, 'cloud'))
+        }
         this.platforms = this.physics.add.staticGroup()
 
         for (let i = 0; i < 5; i++)
@@ -76,6 +89,18 @@ export default class Game extends Phaser.Scene
             {
                 platform.y = scrollY - Phaser.Math.Between(50, 100)
                 platform.body.updateFromGameObject()
+            }
+        })
+
+        this.clouds.children.iterate(child =>
+        {
+            /** @type {Phaser.GameObjects.Image} */
+            const cloud = child
+
+            const scrollY = this.cameras.main.scrollY
+            if (cloud.y >= scrollY + 800)
+            {
+                cloud.y = scrollY - phaser.Math.Between(20, 60)
             }
         })
 
