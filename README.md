@@ -2,6 +2,6 @@
 A clone of doodle jump using Phaser3 js
 ## Play the Game
 
-You can play the game directly here:
+You can play the game by visiting the following link:
 
-<iframe src="https://emadkhezri.github.io/doodle-jump-clone-in-phaser/" width="800" height="600"></iframe>
+[![Play My Game](https://emadkhezri.github.io/doodle-jump-clone-in-phaser/assets/Preview/screenshot.jpg)](https://emadkhezri.github.io/doodle-jump-clone-in-phaser/)
