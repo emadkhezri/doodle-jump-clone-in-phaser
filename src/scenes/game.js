@@ -9,7 +9,7 @@ export default class Game extends Phaser.Scene
     player
 
 
-    /** @type {Phaser.Physics.Arcade.staticGroup} */
+    /** @type {Phaser.Physics.Arcade.StaticGroup} */
     platforms
 
 
@@ -27,7 +27,12 @@ export default class Game extends Phaser.Scene
 
     constructor()
     {
-        super({ key: 'Game' });
+        super({ key: 'game' });
+    }
+
+    init()
+    {
+        this.carrotCollected = 0;
     }
 
     preload()
@@ -160,6 +165,15 @@ export default class Game extends Phaser.Scene
         }
 
         this.horizontalWrap(this.player)
+
+        const bottomPlatform = this.findBottomMostPlatform()
+        if (this.player.y > bottomPlatform.y + 200)
+        {
+            // Register the final score
+            this.registry.set('final-score', this.carrotsCollectedText.text)
+
+            this.scene.start('game-over')
+        }
     }
 
     /**
@@ -217,5 +231,25 @@ export default class Game extends Phaser.Scene
         this.carrotCollected++
 
         this.carrotsCollectedText.text = `Carrots: ${ this.carrotCollected }`
+    }
+
+    findBottomMostPlatform()
+    {
+        const platforms = this.platforms.getChildren()
+        let bottomPlatform = platforms[0]
+
+        for (let i = 1; i < platforms.length; i++)
+        {
+            const platform = platforms[i]
+
+            if (platform.y < bottomPlatform.y)
+            {
+                continue;
+            }
+
+            bottomPlatform = platform;
+        }
+
+        return bottomPlatform;
     }
 }
