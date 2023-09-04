@@ -100,8 +100,8 @@ export default class Game extends Phaser.Scene
 
         this.physics.add.overlap(this.player, this.carrots, this.handleCollectCarrot, undefined, this)
 
-        const style = { color: '#000', fontSize: 24 }
-        this.carrotsCollectedText = this.add.text(240, 10, 'Carrot: 0', style).setScrollFactor(0).setOrigin(0.5, 0)
+        const style = { color: '#000', fontSize: 24, fontStyle: 'bold', backgroundColor: '#f5a040', }
+        this.carrotsCollectedText = this.add.text(240, 10, 'Carrot: 0', style).setScrollFactor(0).setOrigin(0.5, 0).setDepth(1)
     }
 
     update()
@@ -112,9 +112,10 @@ export default class Game extends Phaser.Scene
             const platform = child
 
             const scrollY = this.cameras.main.scrollY
-            if (platform.y >= scrollY + 700)
+            if (platform.y >= scrollY + 640)
             {
-                platform.y = scrollY - Phaser.Math.Between(50, 100)
+                platform.y = scrollY - Phaser.Math.Between(80, 120)
+                platform.x = Phaser.Math.Between(40, 440)
                 platform.body.updateFromGameObject()
 
                 // create a carrot above the platform beign reused
