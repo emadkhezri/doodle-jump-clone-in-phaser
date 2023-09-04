@@ -1,8 +1,10 @@
-import phaser from '../lib/phaser.js';
 import Phaser from '../lib/phaser.js';
+import Carrot from '../game/carrot.js'
 
 export default class Game extends Phaser.Scene
 {
+    carrotCollected = 0
+
     /** @type {Phaser.Physics.Arcade.Sprite} */
     player
 
@@ -16,6 +18,12 @@ export default class Game extends Phaser.Scene
 
     /** @type {Phaser.GameObjects.Group} */
     clouds
+
+    /** @type {Phaser.Physics.Arcade.Group} */
+    carrots
+
+    /** @type {Phaser.GameObjects.Text} */
+    carrotsCollectedText
 
     constructor()
     {
@@ -32,6 +40,9 @@ export default class Game extends Phaser.Scene
         this.load.image('platform', 'Environment/ground_grass.png')
         // add this new line
         this.load.image('bunny-stand', 'Players/bunny1_stand.png')
+        this.load.image('bunny-jump', 'Players/bunny1_jump.png')
+
+        this.load.image('carrot', 'Items/carrot.png')
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -75,6 +86,17 @@ export default class Game extends Phaser.Scene
         this.cameras.main.startFollow(this.player)
         // set the horizontal dead zone to 1.5x game width
         this.cameras.main.setDeadzone(this.scale.width * 1.5)
+
+        this.carrots = this.physics.add.group({
+            classType: Carrot
+        })
+
+        this.physics.add.collider(this.platforms, this.carrots)
+
+        this.physics.add.overlap(this.player, this.carrots, this.handleCollectCarrot, undefined, this)
+
+        const style = { color: '#000', fontSize: 24 }
+        this.carrotsCollectedText = this.add.text(240, 10, 'Carrot: 0', style).setScrollFactor(0).setOrigin(0.5, 0)
     }
 
     update()
@@ -89,6 +111,9 @@ export default class Game extends Phaser.Scene
             {
                 platform.y = scrollY - Phaser.Math.Between(50, 100)
                 platform.body.updateFromGameObject()
+
+                // create a carrot above the platform beign reused
+                this.addCarrotAbove(platform)
             }
         })
 
@@ -100,7 +125,7 @@ export default class Game extends Phaser.Scene
             const scrollY = this.cameras.main.scrollY
             if (cloud.y >= scrollY + 800)
             {
-                cloud.y = scrollY - phaser.Math.Between(20, 60)
+                cloud.y = scrollY - Phaser.Math.Between(20, 60)
             }
         })
 
@@ -109,7 +134,17 @@ export default class Game extends Phaser.Scene
         if (touchingDown)
         {
             this.player.setVelocityY(-600)
+
+            this.player.setTexture('bunny-jump')
         }
+
+        const vy = this.player.body.velocity.y
+        if (vy > 0 && this.player.texture.key !== 'bunny-stand')
+        {
+            // switch back to jump when falling
+            this.player.setTexture('bunny-stand')
+        }
+
 
         if (this.cursors.left.isDown && !touchingDown)
         {
@@ -142,5 +177,45 @@ export default class Game extends Phaser.Scene
         {
             sprit.x = -halfWidth
         }
+    }
+
+    /**
+     * @param {Phaser.GameObjects.Sprite} sprite 
+     */
+    addCarrotAbove(sprite)
+    {
+        const y = sprite.y - sprite.displayHeight;
+
+        /** @type {Phaser.Physics.Arcade.Sprite} */
+        const carrot = this.carrots.get(sprite.x, y, 'carrot')
+
+        carrot.setActive(true)
+        carrot.setVisible(true)
+
+        this.add.existing(carrot)
+
+        // update the physics body size
+        carrot.body.setSize(carrot.width, carrot.height)
+
+        this.physics.world.enable(carrot)
+
+        return carrot
+    }
+
+    /**
+     * @param {Phaser.Physics.Arcade.Sprite} player 
+     * @param {Carrot} carrot 
+     */
+    handleCollectCarrot(player, carrot)
+    {
+        //hide from display
+        this.carrots.killAndHide(carrot)
+
+        //disable from physics world
+        this.physics.world.disableBody(carrot.body)
+
+        this.carrotCollected++
+
+        this.carrotsCollectedText.text = `Carrots: ${ this.carrotCollected }`
     }
 }
