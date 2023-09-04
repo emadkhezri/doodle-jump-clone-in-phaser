@@ -25,6 +25,9 @@ export default class Game extends Phaser.Scene
     /** @type {Phaser.GameObjects.Text} */
     carrotsCollectedText
 
+    /** @type {Phaser.Sound.NoAudioSound} */
+    gameMusic
+
     constructor()
     {
         super({ key: 'game' });
@@ -51,6 +54,7 @@ export default class Game extends Phaser.Scene
 
         this.load.audio('jump', 'Audio/phaseJump2.ogg')
         this.load.audio('collect', "Audio/powerUp5.ogg")
+        this.load.audio('background-music', 'Audio/back-home.wav')
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -105,6 +109,9 @@ export default class Game extends Phaser.Scene
 
         const style = { color: '#000', fontSize: 24, fontStyle: 'bold', backgroundColor: '#f5a040', }
         this.carrotsCollectedText = this.add.text(240, 10, 'Carrot: 0', style).setScrollFactor(0).setOrigin(0.5, 0).setDepth(1)
+
+        this.gameMusic = this.sound.add('background-music', { loop: true })
+        this.gameMusic.play()
     }
 
     update()
@@ -177,6 +184,7 @@ export default class Game extends Phaser.Scene
         {
             // Register the final score
             this.registry.set('final-score', this.carrotsCollectedText.text)
+            this.gameMusic.stop()
 
             this.scene.start('game-over')
         }
